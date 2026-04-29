@@ -1,0 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap');
+@import "tailwindcss";
+
+@theme inline {
+  --color-brand:      #1A6FD4;
+  --color-brand-dim:  #1458a8;
+  --color-bg:         #0A0F1E;
+  --color-surface:    #111827;
+  --color-surface2:   #1a2236;
+  --color-border:     #1e2d4a;
+  --color-text:       #e2e8f0;
+  --color-muted:      #64748b;
+  --font-sans: 'DM Sans', system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  background: #0A0F1E;
+  color: #e2e8f0;
+  font-family: 'DM Sans', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: #0A0F1E; }
+::-webkit-scrollbar-thumb { background: #1e2d4a; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #1A6FD4; }
+
+/* Remove default outline and add brand focus */
+*:focus-visible {
+  outline: 2px solid #1A6FD4;
+  outline-offset: 2px;
+}
