@@ -1,6 +1,7 @@
 'use client';
 
-import { BoltIcon, TableCellsIcon, ViewColumnsIcon, BellAlertIcon } from '@heroicons/react/24/outline';
+import Link from 'next/link';
+import { BoltIcon, TableCellsIcon, ViewColumnsIcon, BellAlertIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 
 interface HeaderProps {
   view: 'table' | 'kanban';
@@ -75,7 +76,15 @@ export default function Header({ view, onViewChange, overdueCount, onAddLead }: 
         </div>
       )}
 
-      <div className="ml-auto">
+      <div className="ml-auto flex items-center gap-2">
+        <Link
+          href="/negocio"
+          className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-medium transition-colors"
+          style={{ background: '#111827', color: '#94a3b8', border: '1px solid #1e2d4a' }}
+        >
+          <ChartBarIcon className="w-4 h-4" />
+          <span className="hidden sm:inline">Negocio</span>
+        </Link>
         <button
           onClick={onAddLead}
           className="px-4 py-2 rounded-lg text-sm font-semibold text-white transition-opacity hover:opacity-90 active:opacity-75"

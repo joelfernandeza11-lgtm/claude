@@ -1,3 +1,72 @@
+// ── Business Management ────────────────────────────────────────────────────
+
+export interface RegistroDiario {
+  id: string;
+  fecha: string;
+  facturacion: number;
+  ganancia: number;
+  notas: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export type RegistroDiarioInput = Omit<RegistroDiario, 'id' | 'created_at' | 'updated_at'>;
+
+export type CategoriasCosto =
+  | 'Sueldos'
+  | 'Materiales'
+  | 'Alquiler'
+  | 'Servicios'
+  | 'Marketing'
+  | 'Herramientas'
+  | 'Transporte'
+  | 'Otros';
+
+export const CATEGORIAS_COSTO: CategoriasCosto[] = [
+  'Sueldos', 'Materiales', 'Alquiler', 'Servicios',
+  'Marketing', 'Herramientas', 'Transporte', 'Otros',
+];
+
+export const CATEGORIA_COLORS: Record<CategoriasCosto, string> = {
+  Sueldos:      '#3b82f6',
+  Materiales:   '#f59e0b',
+  Alquiler:     '#8b5cf6',
+  Servicios:    '#06b6d4',
+  Marketing:    '#ec4899',
+  Herramientas: '#f97316',
+  Transporte:   '#10b981',
+  Otros:        '#64748b',
+};
+
+export interface Costo {
+  id: string;
+  fecha: string;
+  categoria: CategoriasCosto;
+  descripcion: string;
+  monto: number;
+  created_at: string;
+}
+
+export type CostoInput = Omit<Costo, 'id' | 'created_at'>;
+
+export type TipoPedido = 'gasto' | 'inversion';
+export type EstadoPedido = 'pendiente' | 'recibido' | 'cancelado';
+
+export interface Pedido {
+  id: string;
+  fecha: string;
+  proveedor: string;
+  descripcion: string;
+  monto: number;
+  tipo: TipoPedido;
+  estado: EstadoPedido;
+  created_at: string;
+}
+
+export type PedidoInput = Omit<Pedido, 'id' | 'created_at'>;
+
+// ── CRM ───────────────────────────────────────────────────────────────────
+
 export type Escala = 'Chica <30k USD' | 'Media 30k-200k' | 'Grande +200k';
 export type Canal = 'WhatsApp' | 'Instagram DM' | 'Web' | 'Referido';
 export type Estado =
