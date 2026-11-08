@@ -111,6 +111,8 @@ export interface Brief {
   depth: Depth;
   priceTier: 'cualquiera' | 'accesible' | 'medio' | 'premium';
   notes: string;
+  /** Dirección concreta a investigar (se completa en las rondas de foco). */
+  focus: string;
 }
 
 export const EMPTY_BRIEF: Brief = {
@@ -123,6 +125,7 @@ export const EMPTY_BRIEF: Brief = {
   depth: 'estandar',
   priceTier: 'cualquiera',
   notes: '',
+  focus: '',
 };
 
 // ---------- Resultados ----------
@@ -152,6 +155,8 @@ export interface Brand {
   amazon: { status: Signal; url?: string; note?: string };
   traction: number; // 0-10 estimado por el agente
   tractionSignals: string[];
+  /** Temas recurrentes en reseñas de clientes (quejas = oportunidad). */
+  reviewThemes: string[];
   sources: string[];
   demo?: boolean;
 }
@@ -170,15 +175,6 @@ export type StreamEvent =
   | { t: 'done' }
   | { t: 'error'; message: string };
 
-export interface Synthesis {
-  summary: string;
-  formatInsights: { format: string; saturation: 'baja' | 'media' | 'alta'; note: string }[];
-  gaps: string[];
-  angles: string[];
-  risks: string[];
-  nextSteps: string[];
-}
-
 export interface DeepDive {
   overview: string;
   products: { name: string; format: string; price: string; note?: string }[];
@@ -191,4 +187,90 @@ export interface DeepDive {
   weaknesses: string[];
   differentiate: string[];
   sources: string[];
+}
+
+// ---------- Camino al producto (descubrimiento por rondas) ----------
+
+export type StageId = 'explorar' | 'enfocar' | 'definir' | 'concepto';
+
+export const STAGES: { id: StageId; label: string; blurb: string }[] = [
+  { id: 'explorar', label: 'Radar global', blurb: 'Qué se vende hoy y qué huecos hay' },
+  { id: 'enfocar', label: 'Foco', blurb: 'Competencia directa y voz del cliente' },
+  { id: 'definir', label: 'Definición', blurb: 'Posicionamiento, precio y oferta' },
+  { id: 'concepto', label: 'Concepto', blurb: 'Ficha del producto y plan de validación' },
+];
+
+export const stageIndex = (decisions: number) => Math.min(decisions, STAGES.length - 1);
+
+export interface OptionItem {
+  id: string;
+  label: string;
+  detail: string;
+  format?: FormatId | 'otro';
+  audience?: string;
+  angle?: string;
+  price?: string;
+  risk?: string;
+  recommended?: boolean;
+}
+
+export interface Decision {
+  stage: StageId;
+  question: string;
+  answer: string;
+  detail?: string;
+  option?: OptionItem;
+}
+
+export interface Finding {
+  title: string;
+  detail: string;
+  confidence: 'alta' | 'media' | 'baja';
+  basis: 'evidencia' | 'inferencia';
+}
+
+export interface ConceptDossier {
+  workingTitle: string;
+  oneLiner: string;
+  format: string;
+  audience: string;
+  painStatement: string;
+  promise: string;
+  keyComponents: string[];
+  positioning: string;
+  heroAngles: string[];
+  pricing: { positioning: string; range: string; offer: string };
+  competitorSet: { name: string; why: string }[];
+  differentiators: string[];
+  risks: string[];
+  validationPlan: { step: string; how: string; metric: string }[];
+  openQuestions: string[];
+}
+
+export interface DiscoverResult {
+  stage: StageId;
+  headline: string;
+  findings: Finding[];
+  question?: string;
+  options: OptionItem[];
+  board: { format?: string; audience?: string; angle?: string; price?: string };
+  readiness: number;
+  concept?: ConceptDossier;
+}
+
+// ---------- Estado compartido de la sala de búsqueda ----------
+
+export interface AgentState {
+  status: 'waiting' | 'searching' | 'done' | 'error';
+  message?: string;
+  lastQuery?: string;
+  sources: number;
+  brands: number;
+}
+
+export interface FeedItem {
+  id: number;
+  market: string;
+  kind: 'query' | 'source' | 'info';
+  text: string;
 }

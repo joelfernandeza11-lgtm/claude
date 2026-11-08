@@ -113,6 +113,7 @@ export default function BrandCard({
           {brand.why && <p>{brand.why}</p>}
           {brand.meta.note && <p><b className="text-slate-300">Meta:</b> {brand.meta.note}</p>}
           {brand.tractionSignals.length > 0 && <p><b className="text-slate-300">Tracción:</b> {brand.tractionSignals.join(' · ')}</p>}
+          {(brand.reviewThemes ?? []).length > 0 && <p><b className="text-slate-300">Voz del cliente:</b> {brand.reviewThemes.join(' · ')}</p>}
           {brand.formats.some((f) => f.url) && (
             <ul className="space-y-0.5">
               {brand.formats.filter((f) => f.url).map((f, i) => (

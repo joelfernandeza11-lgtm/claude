@@ -99,7 +99,11 @@ ${formatsClause(brief)}
 ${PRICE_HINT[brief.priceTier]}
 Meta Ads requirement: ${brief.metaAds}. Amazon requirement: ${brief.amazon}. (If "obligatorio", drop brands with no signal at all; if "preferido", rank them higher; "indiferente" = ignore.)
 ${brief.notes ? `Extra notes from the founder: ${brief.notes}` : ''}
-
+${
+  brief.focus
+    ? `\nFOCUS MODE — the founder already narrowed the search to this direction: ${brief.focus}\nPrioritise DIRECT competitors of exactly this concept (same format and similar audience), their price points and offer mechanics (bundles, subscription, guarantee), and what customers repeatedly praise or complain about in reviews (Amazon, Trustpilot, Reddit). Fill "reviewThemes" thoroughly. Ignore brands that only sell other formats.\n`
+    : ''
+}
 Task: use web search (at most ${depth.searches} searches; run them efficiently, mixing queries such as best-of lists, "<pain> supplement/serum/shampoo brand ${market.label}", Amazon bestseller pages, brand sites, press/review sites and ad-intelligence pages) and return the ${depth.perMarket} strongest DTC brands for this market, favouring variety of formats over several brands that sell the same format.
 
 JSON schema (return exactly this shape):
@@ -121,6 +125,7 @@ JSON schema (return exactly this shape):
       "amazon": { "status": "confirmed | likely | unknown | none", "url": "listing URL if found, else empty", "note": "short note" },
       "traction": 0,
       "tractionSignals": ["short evidence strings, e.g. '12k reseñas', 'prensa en Allure'"],
+      "reviewThemes": ["recurring customer themes in Spanish, e.g. 'queja: sabor artificial', 'elogio: resultados a los 3 meses' (empty if not found)"],
       "sources": ["URLs you actually saw"]
     }
   ]
@@ -175,6 +180,7 @@ export function normalizeBrand(raw: Raw, market: string): Brand | null {
     amazon: { status: asSignal(amazon.status), url: safeUrl(str(amazon.url, 400)), note: str(amazon.note, 200) || undefined },
     traction: Number.isFinite(traction) ? Math.max(0, Math.min(10, traction)) : 3,
     tractionSignals: strArr(raw.tractionSignals, 6),
+    reviewThemes: strArr(raw.reviewThemes, 6),
     sources: strArr(raw.sources, 6).map((s) => safeUrl(s)).filter((s): s is string => Boolean(s)),
   };
 }

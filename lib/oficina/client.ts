@@ -1,4 +1,4 @@
-import type { Brand, Brief, Signal, Synthesis } from './types';
+import type { Brand, Brief, ConceptDossier, Decision, DiscoverResult, Signal } from './types';
 import { formatById, marketById } from './types';
 import { scoreBrand } from './score';
 
@@ -30,6 +30,7 @@ export function mergeBrands(existing: Brand[], incoming: Brand[]): Brand[] {
       },
       traction: Math.max(cur.traction, n.traction),
       tractionSignals: uniq([...cur.tractionSignals, ...n.tractionSignals]).slice(0, 8),
+      reviewThemes: uniq([...(cur.reviewThemes ?? []), ...(n.reviewThemes ?? [])]).slice(0, 8),
       sources: uniq([...cur.sources, ...n.sources]).slice(0, 10),
       why: cur.why || n.why,
       angle: cur.angle || n.angle,
@@ -93,12 +94,14 @@ export function lsSet(key: string, value: unknown): void {
   }
 }
 
+/** Una investigación completa (sesión): se puede retomar desde donde quedó. */
 export interface HistoryItem {
   id: string;
   at: number;
   brief: Brief;
   brands: Brand[];
-  synthesis?: Synthesis;
+  decisions: Decision[];
+  disc?: DiscoverResult;
   demo?: boolean;
 }
 
@@ -133,4 +136,58 @@ export function download(filename: string, content: string, mime = 'text/csv;cha
   a.download = filename;
   a.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+// ---------- Dossier en Markdown ----------
+
+export function conceptToMarkdown(brief: Brief, decisions: Decision[], c: ConceptDossier): string {
+  const li = (xs: string[]) => (xs.length ? xs.map((x) => `- ${x}`).join('\n') : '- —');
+  return `# ${c.workingTitle || 'Concepto de producto'}
+
+> ${c.oneLiner}
+
+**Dolor de partida:** ${brief.pain}
+**Mercados relevados:** ${brief.markets.map((m) => marketById(m)?.label ?? m).join(', ')}
+
+## Camino recorrido
+${decisions.length ? decisions.map((d, i) => `${i + 1}. ${d.question} → **${d.answer}**`).join('\n') : '- —'}
+
+## Producto
+- **Formato:** ${c.format}
+- **Público:** ${c.audience}
+- **Dolor (en palabras del cliente):** ${c.painStatement}
+- **Promesa:** ${c.promise}
+
+### Componentes / características clave
+${li(c.keyComponents)}
+
+## Posicionamiento
+${c.positioning}
+
+### Ángulos de anuncio para testear
+${li(c.heroAngles)}
+
+## Precio y oferta
+- **Posicionamiento:** ${c.pricing.positioning}
+- **Rango:** ${c.pricing.range}
+- **Oferta:** ${c.pricing.offer}
+
+## Competidores de referencia
+${c.competitorSet.length ? c.competitorSet.map((x) => `- **${x.name}:** ${x.why}`).join('\n') : '- —'}
+
+## Diferenciales
+${li(c.differentiators)}
+
+## Riesgos
+${li(c.risks)}
+
+## Plan de validación
+${c.validationPlan.length ? c.validationPlan.map((v, i) => `${i + 1}. **${v.step}** — ${v.how} _(métrica: ${v.metric})_`).join('\n') : '- —'}
+
+## Preguntas abiertas
+${li(c.openQuestions)}
+
+---
+_Generado con Atlas. Análisis asistido por IA: validá precios, claims y anuncios en las fuentes antes de invertir._
+`;
 }

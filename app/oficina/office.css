@@ -1,0 +1,43 @@
+/* Animaciones de la oficina de Atlas. Respetan prefers-reduced-motion. */
+
+.atlas-scene { container-type: inline-size; }
+
+@keyframes atlas-arm-a { 0% { transform: rotate(-2deg); } 100% { transform: rotate(4deg); } }
+@keyframes atlas-arm-b { 0% { transform: rotate(3deg); } 100% { transform: rotate(-3deg); } }
+@keyframes atlas-head-work { 0%,100% { transform: rotate(0deg) translateY(0); } 50% { transform: rotate(-1.5deg) translateY(1px); } }
+@keyframes atlas-head-think { 0%,100% { transform: rotate(-4deg); } 50% { transform: rotate(-7deg); } }
+@keyframes atlas-steam { 0% { opacity: 0; transform: translateY(0) scaleX(1); } 30% { opacity: .6; } 100% { opacity: 0; transform: translateY(-16px) scaleX(1.4); } }
+@keyframes atlas-ping { 0% { transform: scale(.6); opacity: .9; } 100% { transform: scale(3); opacity: 0; } }
+@keyframes atlas-flow { to { stroke-dashoffset: -40; } }
+@keyframes atlas-caret { 0%,50% { opacity: 1; } 51%,100% { opacity: 0; } }
+@keyframes atlas-rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes atlas-glow { 0%,100% { opacity: .55; } 50% { opacity: .9; } }
+@keyframes atlas-scan { 0% { transform: translateY(-100%); } 100% { transform: translateY(100%); } }
+@keyframes atlas-dots { 0%,20% { content: '.'; } 40% { content: '..'; } 60%,100% { content: '...'; } }
+@keyframes atlas-float { 0%,100% { transform: translateY(0) rotate(var(--r, 0deg)); } 50% { transform: translateY(-2px) rotate(var(--r, 0deg)); } }
+
+.atlas-arm-a { transform-origin: 812px 276px; }
+.atlas-arm-b { transform-origin: 808px 280px; }
+.atlas-head { transform-origin: 790px 214px; }
+.atlas-working .atlas-arm-a { animation: atlas-arm-a .22s ease-in-out infinite alternate; }
+.atlas-working .atlas-arm-b { animation: atlas-arm-b .3s ease-in-out infinite alternate; }
+.atlas-working .atlas-head { animation: atlas-head-work 2.4s ease-in-out infinite; }
+.atlas-thinking .atlas-head { animation: atlas-head-think 2.8s ease-in-out infinite; }
+.atlas-steam { animation: atlas-steam 2.6s ease-out infinite; transform-box: fill-box; transform-origin: center bottom; }
+.atlas-steam:nth-child(2) { animation-delay: .8s; }
+.atlas-steam:nth-child(3) { animation-delay: 1.6s; }
+.atlas-ping { animation: atlas-ping 1.6s ease-out infinite; transform-box: fill-box; transform-origin: center; }
+.atlas-arc { stroke-dasharray: 6 8; animation: atlas-flow 1.2s linear infinite; }
+.atlas-caret { animation: atlas-caret 1s steps(1) infinite; }
+.atlas-rise { animation: atlas-rise .35s ease-out both; }
+.atlas-glow { animation: atlas-glow 3.2s ease-in-out infinite; }
+.atlas-scan { animation: atlas-scan 2.2s linear infinite; }
+.atlas-dots::after { content: '...'; animation: atlas-dots 1.4s steps(1) infinite; }
+.atlas-sticky { animation: atlas-float 5s ease-in-out infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .atlas-working .atlas-arm-a, .atlas-working .atlas-arm-b, .atlas-working .atlas-head, .atlas-thinking .atlas-head,
+  .atlas-steam, .atlas-ping, .atlas-arc, .atlas-caret, .atlas-rise, .atlas-glow, .atlas-scan, .atlas-dots::after, .atlas-sticky {
+    animation: none !important;
+  }
+}

@@ -1,38 +1,28 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { Brand, Brief, FORMATS, Synthesis, formatById, marketById } from '@/lib/oficina/types';
+import { Brand, Brief, FORMATS, formatById, marketById } from '@/lib/oficina/types';
 import { brandsToCsv, download, sortByScore } from '@/lib/oficina/client';
 import BrandCard from './BrandCard';
-import { Badge, Card, Pill, Spinner, cx } from './ui';
+import { Card, Pill, cx } from './ui';
 
-type Tab = 'marcas' | 'mapa' | 'oportunidades' | 'shortlist';
-export type SynthState = { status: 'idle' | 'loading' | 'ready' | 'error'; data?: Synthesis; error?: string };
+type Tab = 'marcas' | 'mapa' | 'shortlist';
 
+/** Panel de evidencia: las marcas que respaldan las conclusiones de Atlas. */
 export default function Results({
   brief,
   brands,
   agentErrors,
-  synth,
-  onRetrySynth,
   shortlist,
   onToggleSave,
   onDeepDive,
-  onRefine,
-  onNew,
-  demo,
 }: {
   brief: Brief;
   brands: Brand[];
   agentErrors: { market: string; message: string }[];
-  synth: SynthState;
-  onRetrySynth: () => void;
   shortlist: string[];
   onToggleSave: (id: string) => void;
   onDeepDive: (b: Brand) => void;
-  onRefine: () => void;
-  onNew: () => void;
-  demo?: boolean;
 }) {
   const [tab, setTab] = useState<Tab>('marcas');
   const [fFormat, setFFormat] = useState<string>('');
@@ -64,40 +54,19 @@ export default function Results({
   const tabs: { id: Tab; label: string; n?: number }[] = [
     { id: 'marcas', label: 'Marcas', n: brands.length },
     { id: 'mapa', label: 'Mapa de formatos' },
-    { id: 'oportunidades', label: 'Oportunidades' },
     { id: 'shortlist', label: 'Shortlist', n: saved.length },
   ];
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      {demo && (
-        <p className="mb-4 rounded-xl border border-violet-400/30 bg-violet-400/10 p-3 text-sm text-violet-200">
-          🧪 <b>Modo demo:</b> datos ilustrativos para probar la interfaz. No están verificados. Configurá <code>ANTHROPIC_API_KEY</code> para búsquedas reales.
-        </p>
-      )}
-
-      <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Resultados</p>
-          <h1 className="text-2xl font-semibold text-white">{brief.pain}</h1>
-          <p className="mt-1 text-sm text-slate-400">
-            {brands.length} marcas · {brief.markets.map((m) => marketById(m)?.flag).join(' ')} · {multi} presentes en más de un mercado
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <button type="button" onClick={onRefine} className="rounded-xl border border-white/10 px-4 py-2 text-sm text-slate-300 hover:border-white/30 hover:text-white">
-            Refinar búsqueda
-          </button>
-          <button type="button" onClick={onNew} className="rounded-xl bg-emerald-400 px-4 py-2 text-sm font-semibold text-slate-900 hover:bg-emerald-300">
-            Nueva búsqueda
-          </button>
-        </div>
-      </div>
+    <div>
+      <p className="mb-4 text-sm text-slate-400">
+        {brands.length} marcas relevadas · {multi} presentes en más de un mercado. Ordenadas por un puntaje transparente (abrí «Ver evidencia» en cada una).
+      </p>
 
       {agentErrors.length > 0 && (
         <p className="mb-4 rounded-xl border border-amber-400/30 bg-amber-400/10 p-3 text-sm text-amber-200">
           {agentErrors.length === 1 ? 'Un mercado falló' : `${agentErrors.length} mercados fallaron`}:{' '}
-          {agentErrors.map((e) => `${marketById(e.market)?.label} (${e.message})`).join('; ')}. Podés volver a lanzar la búsqueda con “Refinar búsqueda”.
+          {agentErrors.map((e) => `${marketById(e.market)?.label} (${e.message})`).join('; ')}.
         </p>
       )}
 
@@ -158,7 +127,7 @@ export default function Results({
           </div>
           {filtered.length === 0 ? (
             <Card className="p-8 text-center text-sm text-slate-400">
-              {brands.length === 0 ? 'No se encontraron marcas. Probá ampliando mercados o bajando las exigencias.' : 'Ninguna marca cumple los filtros actuales.'}
+              {brands.length === 0 ? 'No se encontraron marcas.' : 'Ninguna marca cumple los filtros actuales.'}
             </Card>
           ) : (
             <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
@@ -173,8 +142,6 @@ export default function Results({
       {tab === 'mapa' && (
         <FormatMatrix brands={brands} markets={brief.markets} formats={presentFormats.map((f) => f.id)} onPick={(f, m) => { setFFormat(f); setFMarket(m); setTab('marcas'); }} />
       )}
-
-      {tab === 'oportunidades' && <Opportunities synth={synth} onRetry={onRetrySynth} />}
 
       {tab === 'shortlist' &&
         (saved.length === 0 ? (
@@ -251,66 +218,6 @@ function FormatMatrix({
         </tbody>
       </table>
       <p className="mt-3 text-xs text-slate-500">Una marca con varios formatos cuenta en cada uno. Sólo refleja las marcas relevadas, no el mercado completo.</p>
-    </Card>
-  );
-}
-
-function Opportunities({ synth, onRetry }: { synth: SynthState; onRetry: () => void }) {
-  if (synth.status === 'loading' || synth.status === 'idle')
-    return (
-      <Card className="flex items-center gap-3 p-6 text-sm text-slate-300">
-        <Spinner /> Analizando el mercado y buscando huecos de oportunidad…
-      </Card>
-    );
-  if (synth.status === 'error' || !synth.data)
-    return (
-      <Card className="space-y-3 p-6 text-sm text-slate-300">
-        <p>No pude generar el análisis{synth.error ? `: ${synth.error}` : '.'}</p>
-        <button type="button" onClick={onRetry} className="rounded-lg bg-white/10 px-3 py-1.5 hover:bg-white/15">Reintentar</button>
-      </Card>
-    );
-  const d = synth.data;
-  const sat = { baja: 'green', media: 'amber', alta: 'red' } as const;
-  return (
-    <div className="space-y-5">
-      <Card className="p-5">
-        <p className="text-sm leading-relaxed text-slate-200">{d.summary}</p>
-      </Card>
-      {d.formatInsights.length > 0 && (
-        <Card className="p-5">
-          <h3 className="mb-3 text-sm font-semibold text-white">Saturación por formato</h3>
-          <ul className="space-y-2.5">
-            {d.formatInsights.map((f, i) => (
-              <li key={i} className="flex flex-wrap items-start gap-2 text-sm text-slate-300">
-                <span className="w-44 shrink-0 text-white">{f.format}</span>
-                <Badge tone={sat[f.saturation]}>Competencia {f.saturation}</Badge>
-                <span className="min-w-0 flex-1 basis-60 text-slate-400">{f.note}</span>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      )}
-      <div className="grid gap-5 md:grid-cols-2">
-        <List title="Huecos y oportunidades" items={d.gaps} tone="text-emerald-300" />
-        <List title="Ángulos de comunicación" items={d.angles} tone="text-violet-300" />
-        <List title="Riesgos a considerar" items={d.risks} tone="text-amber-300" />
-        <List title="Próximos pasos para validar" items={d.nextSteps} tone="text-sky-300" />
-      </div>
-      <p className="text-xs text-slate-500">Análisis generado por IA a partir de las marcas relevadas; validalo con datos propios antes de invertir.</p>
-    </div>
-  );
-}
-
-function List({ title, items, tone }: { title: string; items: string[]; tone: string }) {
-  if (!items.length) return null;
-  return (
-    <Card className="p-5">
-      <h3 className={cx('mb-3 text-sm font-semibold', tone)}>{title}</h3>
-      <ul className="space-y-2 text-sm leading-relaxed text-slate-300">
-        {items.map((it, i) => (
-          <li key={i} className="flex gap-2"><span className="text-slate-600" aria-hidden>•</span><span>{it}</span></li>
-        ))}
-      </ul>
     </Card>
   );
 }

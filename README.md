@@ -1,12 +1,17 @@
-# Oficina de Producto
+# Atlas — Oficina de inteligencia de producto
 
-Asistente virtual (no es un chat) para investigar mercados ecommerce **antes** de crear una marca. Vive en `/oficina`.
+Una "oficina virtual" para investigar mercados ecommerce de todo el mundo **antes** de crear una marca. Vive en `/oficina`.
 
-**Flujo:** un asistente guiado en 5 pasos (dolor → formatos → mercados → calidad → lanzar) arma el brief. Al lanzar, se abre una "oficina" con **un agente por mercado**, todos buscando en paralelo en la web y mostrando en vivo qué buscan y qué fuentes leen. Los resultados se fusionan y deduplican entre mercados.
+**Cómo se usa:** no es un formulario ni un chat. Contás el dolor que querés resolver y Atlas te lleva, ronda a ronda, hasta un producto concreto:
 
-**Qué devuelve:** marcas DTC con tienda/landing propia, clasificadas por formato (cápsulas, gomitas, shampoo, sérums…), con señales de Meta Ads y Amazon, un puntaje auditable, mapa de formatos × mercados, análisis de oportunidades, shortlist exportable a CSV y una "investigación a fondo" por marca.
+1. **Radar global** — un analista por mercado busca en paralelo (se ve la oficina, el mapa y las búsquedas en vivo). Atlas devuelve *conclusiones* (qué está saturado, qué hueco hay, qué ángulos se repiten) y 3–4 direcciones de producto. Elegís una, o le decís hacia dónde ir.
+2. **Foco** — nueva búsqueda enfocada en esa dirección: competencia directa, precios, ofertas y voz del cliente (reseñas).
+3. **Definición** — Atlas propone paquetes de público, precio y oferta.
+4. **Concepto** — ficha del producto + plan de validación barato (descargable en Markdown).
 
-**Honestidad sobre Meta Ads:** la Biblioteca de Anuncios de Meta no se puede consultar de forma automática (es JavaScript y requiere sesión), así que el agente marca *confirmado / probable / verificar* según la evidencia que encuentra, y cada tarjeta trae un enlace ya filtrado a la Ad Library para confirmarlo en 1 clic.
+En cada paso podés volver atrás. Las marcas que respaldan las conclusiones están en el panel de *Evidencia*: puntaje auditable, señales de Meta Ads y Amazon, mapa de formatos × mercados, shortlist y CSV, e "Investigar a fondo" por marca.
+
+**Honestidad sobre Meta Ads:** la Biblioteca de Anuncios de Meta no se puede consultar de forma automática, así que cada marca se marca como *confirmado / probable / verificar* según la evidencia hallada, con un enlace ya filtrado para confirmarlo en 1 clic. Cada hallazgo de Atlas indica si es *evidencia* o *inferencia*.
 
 ## Configuración
 
@@ -16,15 +21,15 @@ npm install
 npm run dev                  # http://localhost:3000/oficina
 ```
 
-Sin `ANTHROPIC_API_KEY` podés probar la interfaz con el botón **"Probar con datos de demo"** (datos ilustrativos, no verificados).
+Sin `ANTHROPIC_API_KEY` podés recorrer las 4 rondas con **"Ver una demo guiada"** (datos y conclusiones ilustrativos, no verificados).
 
 Variables: `ANTHROPIC_API_KEY`, `OFICINA_MODEL` (default `claude-opus-5-5`), `OFICINA_ACCESS_CODE` (protege los endpoints; recomendado en producción porque cada búsqueda consume créditos).
 
 ## Estructura
 
-- `app/oficina` — página; `components/oficina/*` — asistente, sala de búsqueda, resultados, investigación a fondo.
-- `app/api/oficina/{search,synthesis,deepdive}` — endpoints (streaming NDJSON para búsqueda y deep dive).
-- `lib/oficina/*` — tipos y catálogos (`types.ts`), prompts y agentes (`server.ts`), puntaje (`score.ts`), enlaces de verificación (`links.ts`).
+- `app/oficina` — página y animaciones (`office.css`); `components/oficina/*` — escena animada (`OfficeScene`), entrada, equipo de analistas, conclusiones, dossier, evidencia.
+- `app/api/oficina/{search,discover,deepdive}` — búsqueda (streaming NDJSON, un agente por mercado), cerebro de Atlas por etapa, investigación a fondo.
+- `lib/oficina/*` — tipos y catálogos (`types.ts`), prompts y agentes (`server.ts`), mapamundi (`world.ts`), puntaje (`score.ts`), enlaces (`links.ts`), demo (`demo.ts`).
 
 ---
 

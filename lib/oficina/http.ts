@@ -33,6 +33,7 @@ export function parseBrief(input: unknown): Brief | string {
     depth: DEPTHS.some((d) => d.id === b.depth) ? (b.depth as Brief['depth']) : 'estandar',
     priceTier: (['accesible', 'medio', 'premium'] as const).find((p) => p === b.priceTier) ?? 'cualquiera',
     notes: typeof b.notes === 'string' ? b.notes.trim().slice(0, 600) : '',
+    focus: typeof b.focus === 'string' ? b.focus.trim().slice(0, 700) : '',
   };
 }
 
